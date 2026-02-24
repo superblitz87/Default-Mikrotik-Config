@@ -1,0 +1,80 @@
+/interface bridge
+add admin-mac=78:9A:18:56:D6:CB auto-mac=no comment=defconf name=bridge
+/interface list
+add comment=defconf name=WAN
+add comment=defconf name=LAN
+/interface wireless security-profiles
+set [ find default=yes ] supplicant-identity=MikroTik
+/ip kid-control
+add fri=0s-1d mon=0s-1d name=system-dummy sat=0s-1d sun=0s-1d thu=0s-1d tue=
+0s-1d tur-fri=0s-1d tur-mon=0s-1d tur-sat=0s-1d tur-sun=0s-1d tur-thu=
+0s-1d tur-tue=0s-1d tur-wed=0s-1d wed=0s-1d
+/ip pool
+add name=dhcp ranges=192.168.1.10-192.168.88.254
+/ip dhcp-server
+add address-pool=dhcp disabled=no interface=bridge name=defconf
+/interface bridge port
+add bridge=bridge comment=defconf interface=ether2
+add bridge=bridge comment=defconf interface=ether3
+add bridge=bridge comment=defconf interface=ether4
+add bridge=bridge comment=defconf interface=ether5
+add bridge=bridge comment=defconf interface=sfp1
+/ip neighbor discovery-settings
+set discover-interface-list=LAN
+/interface list member
+add comment=defconf interface=bridge list=LAN
+add comment=defconf interface=ether1 list=WAN
+/ip address
+add address=192.168.88.1/16 comment=defconf interface=bridge network=
+192.168.0.0
+/ip dhcp-client
+add comment=defconf disabled=no interface=ether1
+/ip dhcp-server network
+add address=192.168.0.0/16 comment=defconf dns-server=192.168.88.1 gateway=
+192.168.88.1 netmask=16
+/ip dns
+set allow-remote-requests=yes servers=1.0.0.1,4.4.1.1
+/ip dns static
+add address=192.168.88.1 comment=defconf name=router.lan
+add address=1.0.0.1 name=CloudFlare
+/ip firewall filter
+add action=accept chain=input comment=
+"defconf: accept established,related,untracked" connection-state=
+established,related,untracked
+add action=drop chain=input comment="defconf: drop invalid" connection-state=
+invalid
+add action=accept chain=input comment="defconf: accept ICMP" protocol=icmp
+add action=accept chain=input comment=
+"defconf: accept to local loopback (for CAPsMAN)" dst-address=127.0.0.1
+add action=drop chain=input comment="defconf: drop all not coming from LAN"
+in-interface-list=!LAN
+add action=accept chain=forward comment="defconf: accept in ipsec policy"
+ipsec-policy=in,ipsec
+add action=accept chain=forward comment="defconf: accept out ipsec policy"
+ipsec-policy=out,ipsec
+add action=fasttrack-connection chain=forward comment="defconf: fasttrack"
+connection-state=established,related
+add action=accept chain=forward comment=
+"defconf: accept established,related, untracked" connection-state=
+established,related,untracked
+add action=drop chain=forward comment="defconf: drop invalid"
+connection-state=invalid
+add action=accept chain=forward comment=Plex connection-nat-state=!dstnat
+connection-state=new dst-address=192.168.88.197 in-interface-list=all
+port=1900 protocol=udp
+add action=accept chain=forward connection-nat-state=dstnat connection-state=
+new dst-address=192.168.88.197 port=32400 protocol=tcp
+add action=accept chain=forward connection-nat-state=dstnat connection-state=
+new dst-address=192.168.88.197 port=32469 protocol=tcp
+add action=accept chain=forward connection-nat-state=srcnat,dstnat
+connection-state=new dst-address=192.168.88.197 dst-port=32400 protocol=
+tcp src-address=107.15.224.69 src-port=32400
+/ip firewall nat
+add action=masquerade chain=srcnat comment="defconf: masquerade"
+ipsec-policy=out,none out-interface-list=WAN
+/system clock
+set time-zone-name=America/New_York
+/tool mac-server
+set allowed-interface-list=LAN
+/tool mac-server mac-winbox
+set allowed-interface-list=LAN
