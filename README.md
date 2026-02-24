@@ -32,9 +32,10 @@ Here are the steps (they are tedius, but they work):
 2) if step 1 does not work, then perform the steps to get it in a configuration state (with netinstall open, hold the reset button while pluggin in power for 20 seconds or until you hear a beep)
 3) Check "Apply Default Configuration"
 4) Install the desired firmware (which is part of the instructions from the Mikrotik website/Youtube channel)
-5) After the install, connect the PC to port 2 of the router and access the routers IP address
+5) After the install, connect the PC to port 2 of the router and access the routers IP address or use Mikrotiks WinBox which will connect via the Mac of the Router. (https://mikrotik.com/download/winbox)
 6) Login (username should be admin; password will not need a password)
 7) Create a new password for your router
 8) Access "New Terminal" inside the router
 9) Access the Config file on this page
+⚠️ On the 2nd Line of the config, "admin-mac", the MAC address should be edited to match what is on your Router as well as the Mac that is shown in WinBox for your device or the Mac that is shown in Netinstall for it.⚠️
 10) Copy the lines into New Terminal to have them added to the router. (We suggest doing it one line at a time, just so if an error were to occur it would be easy to figure out where it came from)
